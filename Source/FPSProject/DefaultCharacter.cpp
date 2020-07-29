@@ -2,12 +2,28 @@
 
 
 #include "DefaultCharacter.h"
+#include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 ADefaultCharacter::ADefaultCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	// Create a mesh component that will be used when being viewed from a '1st person' view(when controlling this pawn)
+	CharacterMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh"));
+	CharacterMesh->SetupAttachment(GetCapsuleComponent());
+	CharacterMesh->bCastDynamicShadow = true;
+	CharacterMesh->CastShadow = true;
+	CharacterMesh->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+	CharacterMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -88.0f));
+
+	// Create a CameraComponent	
+	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
+	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
+	FirstPersonCamera->SetRelativeLocation(FVector(10.0f, 0.0f, 83.0f)); // Position the camera
+	FirstPersonCamera->bUsePawnControlRotation = true;
 
 }
 

@@ -11,6 +11,14 @@ class FPSPROJECT_API ADefaultCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+		//Pawn mesh
+		UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+		class USkeletalMeshComponent* CharacterMesh;
+
+		//First person camera
+		UPROPERTY(VisibleAnywhere, Category = Camera)
+		class UCameraComponent* FirstPersonCamera;
+
 public:
 	// Sets default values for this character's properties
 	ADefaultCharacter();
