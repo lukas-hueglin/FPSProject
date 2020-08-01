@@ -4,33 +4,52 @@
 
 UDefaultCharacterAnimInstance::UDefaultCharacterAnimInstance()
 {
-	walkRun = 1.0f;
-	stride = 0.0f;
+	WalkRunBlend = 1.0f;
+	StrideBlend = 0.0f;
+	Speed = 0.0f;
+	YawRotation = 0.0f;
 
 	Gait = EGait::RUNNING;
 	MovementDirection = EMovementDirection::FORWARD;
 
+	//SpeedStrideBlend = UCurveFloat(FObjectInitializer());
 }
 
 void UDefaultCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
-	//set speed
-	AActor* OwningActor = GetOwningActor();
-	if (OwningActor != nullptr)
-	{
-		stride = OwningActor->GetVelocity().Size()/600;
-	}
+	AActor* TryGetOwingActor = GetOwningActor();
+	if (TryGetOwingActor != nullptr)
+		OwningActor = TryGetOwingActor;
 
-	if (Rotation <= -45.0f)
+	UpdateMovementValues(DeltaSeconds);
+	UpdateRotationValues(DeltaSeconds);
+}
+
+void UDefaultCharacterAnimInstance::UpdateMovementValues(float DeltaSeconds)
+{
+	//set Speed
+	Speed = OwningActor->GetVelocity().Size();
+
+	//set StrideBlend
+	//StrideBlend = FFloatCurve().Evaluate(Speed);
+	//StrideBlend = FFloatCurve().
+	StrideBlend = Speed / 600;
+}
+
+void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
+{
+	//Set YawRotation
+	YawRotation = OwningActor->GetVelocity().Rotation().Yaw;
+
+	//Set MovementDirection
+	if(-45.0f < YawRotation && YawRotation < 45.0f)
 		MovementDirection = EMovementDirection::FORWARD;
-	else if (Rotation <= -135.0f)
+	if (-135.0f < YawRotation && YawRotation < -45.0f)
 		MovementDirection = EMovementDirection::LEFT;
-	else if (Rotation >= 45.0f)
+	if (45.0f < YawRotation && YawRotation < 135.0f)
 		MovementDirection = EMovementDirection::RIGHT;
-	else if (Rotation >= 0.0f)
-		MovementDirection = EMovementDirection::FORWARD;
-	else
+	if (YawRotation < -135.0f || 135.0f < YawRotation)
 		MovementDirection = EMovementDirection::BACKWARD;
 }

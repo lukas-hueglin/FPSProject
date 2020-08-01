@@ -36,14 +36,30 @@ public:
 	UDefaultCharacterAnimInstance();
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float walkRun;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float stride;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		EGait Gait;;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//blending value between walking and running
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		float WalkRunBlend;
+	//blending value which indicates the size of the steps
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		float StrideBlend;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		float YawRotation;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		float Speed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		AActor* OwningActor;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		EGait Gait;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		EMovementDirection MovementDirection;
+
+	UPROPERTY()
+		UCurveFloat* SpeedStrideBlend;
 	
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+
+	void UpdateMovementValues(float DeltaSeconds);
+	void UpdateRotationValues(float DeltaSeconds);
 };
