@@ -45,5 +45,4 @@ public:
 		void StartJump();
 	UFUNCTION()
 		void StopJump();
-
 };
