@@ -10,7 +10,9 @@ UDefaultCharacterAnimInstance::UDefaultCharacterAnimInstance()
 	StrideBlend = 0.0f;
 	Speed = 0.0f;
 	YawVelocityRotation = 0.0f;
-	YawAimingRotation = 0.0f;
+
+	//initialize bools
+	bMoving = false;
 
 	//initialize enums
 	Gait = EGait::RUNNING;
@@ -41,6 +43,11 @@ void UDefaultCharacterAnimInstance::UpdateMovementValues(float DeltaSeconds)
 	//set Speed
 	Speed = OwningActor->GetVelocity().Size();
 
+	if (Speed < 1)
+		bMoving = false;
+	else
+		bMoving = true;
+
 	//set StrideBlend
 	StrideBlend = SpeedStrideBlendCurve->GetFloatValue(Speed/100.0f);
 }
@@ -48,7 +55,10 @@ void UDefaultCharacterAnimInstance::UpdateMovementValues(float DeltaSeconds)
 void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
 {
 	//Set YawRotation
-	YawVelocityRotation = OwningActor->GetVelocity().Rotation().Yaw - OwningActor->GetActorRotation().Yaw;
+	if (!bMoving)
+		YawVelocityRotation = OwningActor->GetVelocity().ToOrientationRotator().Yaw - OwningActor->GetActorRotation().Yaw;
+	else
+		YawVelocityRotation = 0.0f;
 
 	//Set MovementDirection
 	if(-45.0f < YawVelocityRotation && YawVelocityRotation < 45.0f)

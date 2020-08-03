@@ -69,9 +69,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float YawVelocityRotation;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		float YawAimingRotation;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float Speed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		bool bMoving;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		AActor* OwningActor;
