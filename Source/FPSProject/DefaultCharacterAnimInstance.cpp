@@ -1,18 +1,27 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "DefaultCharacterAnimInstance.h"
+#include <cmath>
 
 UDefaultCharacterAnimInstance::UDefaultCharacterAnimInstance()
 {
+	//initialize floats
 	WalkRunBlend = 1.0f;
 	StrideBlend = 0.0f;
 	Speed = 0.0f;
-	YawRotation = 0.0f;
+	YawVelocityRotation = 0.0f;
+	YawAimingRotation = 0.0f;
 
+	//initialize enums
 	Gait = EGait::RUNNING;
 	MovementDirection = EMovementDirection::FORWARD;
 
-	//SpeedStrideBlend = UCurveFloat(FObjectInitializer());
+	//initialize structs
+	DirectionBlend = FDirectionBlend();
+
+	//initialize curvs
+	SpeedStrideBlendCurve = CreateDefaultSubobject<UCurveFloat>(TEXT("SpeedStrideBlend"));
+	DirectionBlendCurve = CreateDefaultSubobject<UCurveFloat>(TEXT("DirectionBlend"));
 }
 
 void UDefaultCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -33,23 +42,29 @@ void UDefaultCharacterAnimInstance::UpdateMovementValues(float DeltaSeconds)
 	Speed = OwningActor->GetVelocity().Size();
 
 	//set StrideBlend
-	//StrideBlend = FFloatCurve().Evaluate(Speed);
-	//StrideBlend = FFloatCurve().
-	StrideBlend = Speed / 600;
+	StrideBlend = SpeedStrideBlendCurve->GetFloatValue(Speed/100.0f);
 }
 
 void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
 {
 	//Set YawRotation
-	YawRotation = OwningActor->GetVelocity().Rotation().Yaw;
+	YawVelocityRotation = OwningActor->GetVelocity().Rotation().Yaw - OwningActor->GetActorRotation().Yaw;
 
 	//Set MovementDirection
-	if(-45.0f < YawRotation && YawRotation < 45.0f)
+	if(-45.0f < YawVelocityRotation && YawVelocityRotation < 45.0f)
 		MovementDirection = EMovementDirection::FORWARD;
-	if (-135.0f < YawRotation && YawRotation < -45.0f)
+	if (-135.0f < YawVelocityRotation && YawVelocityRotation < -45.0f)
 		MovementDirection = EMovementDirection::LEFT;
-	if (45.0f < YawRotation && YawRotation < 135.0f)
+	if (45.0f < YawVelocityRotation && YawVelocityRotation < 135.0f)
 		MovementDirection = EMovementDirection::RIGHT;
-	if (YawRotation < -135.0f || 135.0f < YawRotation)
+	if (YawVelocityRotation < -135.0f || 135.0f < YawVelocityRotation)
 		MovementDirection = EMovementDirection::BACKWARD;
+
+	//set DirectionBlend
+	DirectionBlend.f = DirectionBlendCurve->GetFloatValue(YawVelocityRotation/ 100.0f);
+	DirectionBlend.fl = DirectionBlendCurve->GetFloatValue((YawVelocityRotation+45.0f) / 100.0f);
+	DirectionBlend.bl = DirectionBlendCurve->GetFloatValue((YawVelocityRotation+135.0f) / 100.0f);
+	DirectionBlend.b = DirectionBlendCurve->GetFloatValue((YawVelocityRotation+180.0f) / 100.0f);
+	DirectionBlend.br = DirectionBlendCurve->GetFloatValue((YawVelocityRotation-135.0f) / 100.0f);
+	DirectionBlend.fr = DirectionBlendCurve->GetFloatValue((YawVelocityRotation-45.0f) / 100.0f);
 }

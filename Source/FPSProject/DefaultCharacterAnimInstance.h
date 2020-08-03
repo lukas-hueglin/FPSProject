@@ -27,6 +27,30 @@ enum class EMovementDirection : uint8
 	BACKWARD	UMETA(DisplayName = "Backward"),
 };
 
+USTRUCT(BlueprintType)
+struct FDirectionBlend
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+		float f = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+		float fl = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+		float bl = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+		float b = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+		float br = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+		float fr = 0.0f;
+};
+
 UCLASS(transient, Blueprintable, BlueprintType, hideCategories = AnimInstance)
 class FPSPROJECT_API UDefaultCharacterAnimInstance : public UAnimInstance
 {
@@ -43,7 +67,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float StrideBlend;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		float YawRotation;
+		float YawVelocityRotation;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		float YawAimingRotation;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float Speed;
 
@@ -55,8 +81,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		EMovementDirection MovementDirection;
 
-	UPROPERTY()
-		UCurveFloat* SpeedStrideBlend;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		FDirectionBlend DirectionBlend;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		UCurveFloat* SpeedStrideBlendCurve;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		UCurveFloat* DirectionBlendCurve;
 	
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 

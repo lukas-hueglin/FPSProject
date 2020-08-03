@@ -16,7 +16,7 @@ class FPSPROJECT_API ADefaultCharacter : public ACharacter
 		class USkeletalMeshComponent* CharacterMesh;
 
 		//First person camera
-		UPROPERTY(VisibleAnywhere, Category = Camera)
+		UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 		class UCameraComponent* FirstPersonCamera;
 
 public:
