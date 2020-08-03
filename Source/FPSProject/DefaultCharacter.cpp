@@ -21,7 +21,7 @@ ADefaultCharacter::ADefaultCharacter()
 
 	// Create a CameraComponent	
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
+	FirstPersonCamera->SetupAttachment(CharacterMesh, FName("FP_Camera"));
 	FirstPersonCamera->SetRelativeLocation(FVector(-200.0f, 0.0f, 83.0f)); // Position the camera 10.0f, 0.0f, 83.0f
 	FirstPersonCamera->bUsePawnControlRotation = true;
 
