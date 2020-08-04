@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "DefaultCharacter.generated.h"
 
+class UDefaultCharacterAnimInstance;
+
 UCLASS()
 class FPSPROJECT_API ADefaultCharacter : public ACharacter
 {
@@ -22,6 +24,8 @@ class FPSPROJECT_API ADefaultCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	ADefaultCharacter();
+public:
+	UDefaultCharacterAnimInstance* AnimInstance;
 
 protected:
 	// Called when the game starts or when spawned

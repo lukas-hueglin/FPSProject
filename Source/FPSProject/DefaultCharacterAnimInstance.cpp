@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "DefaultCharacterAnimInstance.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include <cmath>
 
 UDefaultCharacterAnimInstance::UDefaultCharacterAnimInstance()
@@ -10,6 +11,8 @@ UDefaultCharacterAnimInstance::UDefaultCharacterAnimInstance()
 	StrideBlend = 0.0f;
 	Speed = 0.0f;
 	YawVelocityRotation = 0.0f;
+	YawRotationRate = 0.0f;
+	YawViewRotation = 0.0f;
 
 	//initialize bools
 	bMoving = false;
@@ -30,20 +33,25 @@ void UDefaultCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
-	AActor* TryGetOwingActor = GetOwningActor();
-	if (TryGetOwingActor != nullptr)
-		OwningActor = TryGetOwingActor;
+	if (OwningCharacter == nullptr)
+	{
+		//initialize
+		OwningCharacter = Cast<ADefaultCharacter>(GetOwningActor());
+	}
 
-	UpdateMovementValues(DeltaSeconds);
-	UpdateRotationValues(DeltaSeconds);
+	else
+	{
+		UpdateMovementValues(DeltaSeconds);
+		UpdateRotationValues(DeltaSeconds);
+	}
 }
 
 void UDefaultCharacterAnimInstance::UpdateMovementValues(float DeltaSeconds)
 {
 	//set Speed
-	Speed = OwningActor->GetVelocity().Size();
+	Speed = FVector(OwningCharacter->GetVelocity().GetComponentForAxis(EAxis::X), OwningCharacter->GetVelocity().GetComponentForAxis(EAxis::Y), 0.0f).Size();
 
-	if (Speed < 1)
+	if (Speed < 1.0f)
 		bMoving = false;
 	else
 		bMoving = true;
@@ -54,13 +62,36 @@ void UDefaultCharacterAnimInstance::UpdateMovementValues(float DeltaSeconds)
 
 void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
 {
-	//Set YawRotation
-	if (!bMoving)
-		YawVelocityRotation = OwningActor->GetVelocity().ToOrientationRotator().Yaw - OwningActor->GetActorRotation().Yaw;
+	//set ViewRotation
+	float OldYawViewRotation = YawViewRotation;
+	YawViewRotation = OwningCharacter->GetViewRotation().Yaw;
+
+	//set RotationRate
+	YawRotationRate = (YawViewRotation - OldYawViewRotation)/DeltaSeconds;
+
+	//set YawRotation
+	if (bMoving)
+	{
+		float TryYawVelocityRotation = OwningCharacter->GetVelocity().Rotation().Yaw;
+
+		//adjust the value so that it is between 0 and 360
+		if (TryYawVelocityRotation < 0.0f)
+			TryYawVelocityRotation += 360.0f;
+
+		//make it relative
+		TryYawVelocityRotation = TryYawVelocityRotation - YawViewRotation;
+
+		//adjust the value so that it is between 0 and 360 again
+		if (TryYawVelocityRotation < 0.0f)
+			TryYawVelocityRotation += 360.0f;
+
+		YawVelocityRotation = TryYawVelocityRotation;
+	}
+
 	else
 		YawVelocityRotation = 0.0f;
 
-	//Set MovementDirection
+	//set MovementDirection
 	if(-45.0f < YawVelocityRotation && YawVelocityRotation < 45.0f)
 		MovementDirection = EMovementDirection::FORWARD;
 	if (-135.0f < YawVelocityRotation && YawVelocityRotation < -45.0f)

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "DefaultCharacter.h"
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "DefaultCharacterAnimInstance.generated.h"
@@ -63,11 +64,20 @@ public:
 	//blending value between walking and running
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float WalkRunBlend;
+
 	//blending value which indicates the size of the steps
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float StrideBlend;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float YawVelocityRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		float YawRotationRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		float YawViewRotation;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float Speed;
 
@@ -75,7 +85,7 @@ public:
 		bool bMoving;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		AActor* OwningActor;
+		ADefaultCharacter* OwningCharacter;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		EGait Gait;
@@ -91,6 +101,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		UCurveFloat* DirectionBlendCurve;
 	
+public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 	void UpdateMovementValues(float DeltaSeconds);
