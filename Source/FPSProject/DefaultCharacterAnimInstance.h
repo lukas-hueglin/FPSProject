@@ -100,6 +100,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		UCurveFloat* DirectionBlendCurve;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		UCurveFloat* WalkRunBlendCurve;
 	
 public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
