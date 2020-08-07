@@ -27,6 +27,9 @@ public:
 public:
 	UDefaultCharacterAnimInstance* AnimInstance;
 
+	bool bPressedWalk;
+	bool bPressedSprint;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -49,4 +52,14 @@ public:
 		void StartJump();
 	UFUNCTION()
 		void StopJump();
+
+	//Called to bind walk state
+	UFUNCTION()
+		void ToggleWalk();
+
+	//Called to bind sprint state
+	UFUNCTION()
+		void StartSprint();
+	UFUNCTION()
+		void StopSprint();
 };

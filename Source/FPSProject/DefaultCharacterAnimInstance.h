@@ -104,6 +104,7 @@ public:
 public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
+	void UpdateStates();
 	void UpdateMovementValues(float DeltaSeconds);
 	void UpdateRotationValues(float DeltaSeconds);
 };

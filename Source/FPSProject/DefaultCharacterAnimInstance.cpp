@@ -41,9 +41,20 @@ void UDefaultCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	else
 	{
+		UpdateStates();
 		UpdateMovementValues(DeltaSeconds);
 		UpdateRotationValues(DeltaSeconds);
 	}
+}
+
+void UDefaultCharacterAnimInstance::UpdateStates()
+{
+	if (OwningCharacter->bPressedSprint)
+		Gait = EGait::SPRINTING;
+	else if (OwningCharacter->bPressedWalk)
+		Gait = EGait::WALKING;
+	else
+		Gait = EGait::RUNNING;
 }
 
 void UDefaultCharacterAnimInstance::UpdateMovementValues(float DeltaSeconds)

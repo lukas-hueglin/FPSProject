@@ -25,6 +25,10 @@ ADefaultCharacter::ADefaultCharacter()
 	FirstPersonCamera->SetRelativeLocation(FVector(-200.0f, 0.0f, 0.0f)); // Position the camera 10.0f, 0.0f, 83.0f
 	FirstPersonCamera->bUsePawnControlRotation = true;
 
+	//Initialize bools
+	bPressedSprint = false;
+	bPressedWalk = false;
+
 }
 
 // Called when the game starts or when spawned
@@ -53,6 +57,12 @@ void ADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ADefaultCharacter::StartJump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ADefaultCharacter::StopJump);
+
+	PlayerInputComponent->BindAction("Walk", IE_Pressed, this, &ADefaultCharacter::ToggleWalk);
+
+
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ADefaultCharacter::StartSprint);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ADefaultCharacter::StopSprint);
 }
 
 void ADefaultCharacter::MoveForward(float Value)
@@ -81,5 +91,21 @@ void ADefaultCharacter::StartJump()
 void ADefaultCharacter::StopJump()
 {
 	bPressedJump = false;
+}
+
+void ADefaultCharacter::ToggleWalk()
+{
+	bPressedWalk = !bPressedWalk;
+}
+
+void ADefaultCharacter::StartSprint()
+{
+	bPressedSprint = true;
+	bPressedWalk = false;
+}
+
+void ADefaultCharacter::StopSprint()
+{
+	bPressedSprint = false;
 }
 
