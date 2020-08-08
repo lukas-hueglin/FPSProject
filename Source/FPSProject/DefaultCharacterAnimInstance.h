@@ -37,19 +37,13 @@ struct FDirectionBlend
 		float f = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly)
-		float fl = 0.0f;
+		float l = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly)
-		float bl = 0.0f;
+		float r = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly)
 		float b = 0.0f;
-
-	UPROPERTY(BlueprintReadOnly)
-		float br = 0.0f;
-
-	UPROPERTY(BlueprintReadOnly)
-		float fr = 0.0f;
 };
 
 UCLASS(transient, Blueprintable, BlueprintType, hideCategories = AnimInstance)
@@ -70,13 +64,7 @@ public:
 		float StrideBlend;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		float YawVelocityRotation;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		float YawRotationRate;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		float YawViewRotation;
+		float YawVelocityDirection;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float Speed;
@@ -103,7 +91,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		UCurveFloat* WalkRunBlendCurve;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FVector RelativeVelocityDirection;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FVector ViewDirection;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FRotator RotationRate;
 public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 

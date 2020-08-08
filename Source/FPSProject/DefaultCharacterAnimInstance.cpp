@@ -2,7 +2,7 @@
 
 #include "DefaultCharacterAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include <cmath>
+#include "Math/UnrealMathUtility.h"
 
 UDefaultCharacterAnimInstance::UDefaultCharacterAnimInstance()
 {
@@ -10,9 +10,7 @@ UDefaultCharacterAnimInstance::UDefaultCharacterAnimInstance()
 	WalkRunBlend = 1.0f;
 	StrideBlend = 0.0f;
 	Speed = 0.0f;
-	YawVelocityRotation = 0.0f;
-	YawRotationRate = 0.0f;
-	YawViewRotation = 0.0f;
+	YawVelocityDirection = 0.0f;
 
 	//initialize bools
 	bMoving = false;
@@ -28,6 +26,13 @@ UDefaultCharacterAnimInstance::UDefaultCharacterAnimInstance()
 	SpeedStrideBlendCurve = CreateDefaultSubobject<UCurveFloat>(TEXT("SpeedStrideBlend"));
 	DirectionBlendCurve = CreateDefaultSubobject<UCurveFloat>(TEXT("DirectionBlend"));
 	WalkRunBlendCurve = CreateDefaultSubobject<UCurveFloat>(TEXT("WalkRunBlend"));
+
+	//initialize vectors
+	RelativeVelocityDirection = FVector();
+	ViewDirection = FVector();
+
+	//initialize rotators
+	RotationRate = FRotator();
 }
 
 void UDefaultCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -77,51 +82,34 @@ void UDefaultCharacterAnimInstance::UpdateMovementValues(float DeltaSeconds)
 
 void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
 {
-	//set ViewRotation
-	float OldYawViewRotation = YawViewRotation;
-	YawViewRotation = OwningCharacter->GetViewRotation().Yaw;
+	// set ViewRotation
+	ViewDirection = OwningCharacter->GetViewRotation().Vector();
+	ViewDirection.Normalize();
+
+	//Set Relative Direction
+	FVector OldRelativeVelocityDirection = RelativeVelocityDirection;
+	RelativeVelocityDirection = OwningCharacter->GetVelocity();
+	RelativeVelocityDirection.Normalize();
+	RelativeVelocityDirection = FRotator(RelativeVelocityDirection.Rotation() - ViewDirection.Rotation()).Vector();
 
 	//set RotationRate
-	YawRotationRate = (YawViewRotation - OldYawViewRotation)/DeltaSeconds;
+	RotationRate = RelativeVelocityDirection.Rotation() - OldRelativeVelocityDirection.Rotation();
 
-	//set YawRotation
-	if (bMoving)
-	{
-		float TryYawVelocityRotation = OwningCharacter->GetVelocity().Rotation().Yaw;
-
-		//adjust the value so that it is between 0 and 360
-		if (TryYawVelocityRotation < 0.0f)
-			TryYawVelocityRotation += 360.0f;
-
-		//make it relative
-		TryYawVelocityRotation = TryYawVelocityRotation - YawViewRotation;
-
-		//adjust the value so that it is between 0 and 360 again
-		if (TryYawVelocityRotation < 0.0f)
-			TryYawVelocityRotation += 360.0f;
-
-		YawVelocityRotation = TryYawVelocityRotation;
-	}
-
-	else
-		YawVelocityRotation = 0.0f;
+	//set YawVelocityDirection
+	YawVelocityDirection = RelativeVelocityDirection.Rotation().Yaw;
 
 	//set MovementDirection
-	if (225.0f <= YawVelocityRotation && YawVelocityRotation < 315.0f)
+	if (-135.0f >= YawVelocityDirection && YawVelocityDirection < -45.0f)
 		MovementDirection = EMovementDirection::LEFT;
-	else if (45.0f < YawVelocityRotation && YawVelocityRotation <= 135.0f)
+	else if (45.0f < YawVelocityDirection && YawVelocityDirection <= 135.0f)
 		MovementDirection = EMovementDirection::RIGHT;
-	else if (YawVelocityRotation > 135.0f && 225.0f > YawVelocityRotation)
+	else if (YawVelocityDirection > 135.0f || -135.0f > YawVelocityDirection)
 		MovementDirection = EMovementDirection::BACKWARD;
 	else
 		MovementDirection = EMovementDirection::FORWARD;
 
-
-	//set DirectionBlend
-	DirectionBlend.f = DirectionBlendCurve->GetFloatValue(YawVelocityRotation/ 100.0f);
-	DirectionBlend.fl = DirectionBlendCurve->GetFloatValue((YawVelocityRotation+45.0f) / 100.0f);
-	DirectionBlend.bl = DirectionBlendCurve->GetFloatValue((YawVelocityRotation+135.0f) / 100.0f);
-	DirectionBlend.b = DirectionBlendCurve->GetFloatValue((YawVelocityRotation+180.0f) / 100.0f);
-	DirectionBlend.br = DirectionBlendCurve->GetFloatValue((YawVelocityRotation+225.0f) / 100.0f);
-	DirectionBlend.fr = DirectionBlendCurve->GetFloatValue((YawVelocityRotation+315.0f) / 100.0f);
+	DirectionBlend.f = FMath::Clamp<float>(RelativeVelocityDirection.X, 0.0f, 1.0f);
+	DirectionBlend.b = FMath::Abs(FMath::Clamp<float>(RelativeVelocityDirection.X, -1.0f, 0.0f));
+	DirectionBlend.l = FMath::Abs(FMath::Clamp<float>(RelativeVelocityDirection.Y, -1.0f, 0.0f));
+	DirectionBlend.r = FMath::Clamp<float>(RelativeVelocityDirection.Y, 0.0f, 1.0f);
 }

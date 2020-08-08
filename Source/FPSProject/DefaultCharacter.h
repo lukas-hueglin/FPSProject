@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "DrawDebugHelpers.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "DefaultCharacter.generated.h"
@@ -18,7 +19,7 @@ class FPSPROJECT_API ADefaultCharacter : public ACharacter
 		class USkeletalMeshComponent* CharacterMesh;
 
 		//First person camera
-		UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+		UPROPERTY(EditAnywhere, Category = Mesh)
 		class UCameraComponent* FirstPersonCamera;
 
 public:
