@@ -87,9 +87,6 @@ public:
 		UCurveFloat* SpeedStrideBlendCurve;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		UCurveFloat* DirectionBlendCurve;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		UCurveFloat* WalkRunBlendCurve;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

@@ -24,7 +24,6 @@ UDefaultCharacterAnimInstance::UDefaultCharacterAnimInstance()
 
 	//initialize curvs
 	SpeedStrideBlendCurve = CreateDefaultSubobject<UCurveFloat>(TEXT("SpeedStrideBlend"));
-	DirectionBlendCurve = CreateDefaultSubobject<UCurveFloat>(TEXT("DirectionBlend"));
 	WalkRunBlendCurve = CreateDefaultSubobject<UCurveFloat>(TEXT("WalkRunBlend"));
 
 	//initialize vectors
@@ -74,10 +73,21 @@ void UDefaultCharacterAnimInstance::UpdateMovementValues(float DeltaSeconds)
 		bMoving = true;
 
 	//set StrideBlend
-	StrideBlend = SpeedStrideBlendCurve->GetFloatValue(Speed/100.0f);
+	StrideBlend = SpeedStrideBlendCurve->GetFloatValue(Speed);
 
 	//Set WalkRunBlend
-	WalkRunBlend = WalkRunBlendCurve->GetFloatValue(static_cast<std::underlying_type<EGait>::type>(Gait));
+	if (Gait == EGait::WALKING)
+		WalkRunBlend = 0.0f;
+	else
+		WalkRunBlend = 1.0f;
+
+	//set MaxWalkingSpeed
+	if (Gait == EGait::WALKING)
+		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 165.0f;
+	if (Gait == EGait::RUNNING)
+		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 350.0f;
+	if (Gait == EGait::SPRINTING)
+		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 600.0f;
 }
 
 void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
