@@ -28,8 +28,12 @@ public:
 public:
 	UDefaultCharacterAnimInstance* AnimInstance;
 
-	bool bPressedWalk;
-	bool bPressedSprint;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		bool bPressedWalk;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		bool bPressedSprint;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		bool bCanSprint;
 
 protected:
 	// Called when the game starts or when spawned

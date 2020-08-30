@@ -11,9 +11,12 @@ UDefaultCharacterAnimInstance::UDefaultCharacterAnimInstance()
 	StrideBlend = 0.0f;
 	Speed = 0.0f;
 	YawVelocityDirection = 0.0f;
+	RotationRate = 0.0f;
 
 	//initialize bools
 	bMoving = false;
+	bRotateR = false;
+	bRotateL = false;
 
 	//initialize enums
 	Gait = EGait::RUNNING;
@@ -21,6 +24,7 @@ UDefaultCharacterAnimInstance::UDefaultCharacterAnimInstance()
 
 	//initialize structs
 	DirectionBlend = FDirectionBlend();
+	LeanBlend = FLeanBlend();
 
 	//initialize curvs
 	SpeedStrideBlendCurve = CreateDefaultSubobject<UCurveFloat>(TEXT("SpeedStrideBlend"));
@@ -29,9 +33,6 @@ UDefaultCharacterAnimInstance::UDefaultCharacterAnimInstance()
 	//initialize vectors
 	RelativeVelocityDirection = FVector();
 	ViewDirection = FVector();
-
-	//initialize rotators
-	RotationRate = FRotator();
 }
 
 void UDefaultCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -49,12 +50,13 @@ void UDefaultCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		UpdateStates();
 		UpdateMovementValues(DeltaSeconds);
 		UpdateRotationValues(DeltaSeconds);
+		UpdateBlends();
 	}
 }
 
 void UDefaultCharacterAnimInstance::UpdateStates()
 {
-	if (OwningCharacter->bPressedSprint)
+	if (OwningCharacter->bPressedSprint && OwningCharacter->bCanSprint)
 		Gait = EGait::SPRINTING;
 	else if (OwningCharacter->bPressedWalk)
 		Gait = EGait::WALKING;
@@ -64,7 +66,7 @@ void UDefaultCharacterAnimInstance::UpdateStates()
 
 void UDefaultCharacterAnimInstance::UpdateMovementValues(float DeltaSeconds)
 {
-	//set Speed
+	//update Speed
 	Speed = FVector(OwningCharacter->GetVelocity().GetComponentForAxis(EAxis::X), OwningCharacter->GetVelocity().GetComponentForAxis(EAxis::Y), 0.0f).Size();
 
 	if (Speed < 1.0f)
@@ -72,16 +74,7 @@ void UDefaultCharacterAnimInstance::UpdateMovementValues(float DeltaSeconds)
 	else
 		bMoving = true;
 
-	//set StrideBlend
-	StrideBlend = SpeedStrideBlendCurve->GetFloatValue(Speed);
-
-	//Set WalkRunBlend
-	if (Gait == EGait::WALKING)
-		WalkRunBlend = 0.0f;
-	else
-		WalkRunBlend = 1.0f;
-
-	//set MaxWalkingSpeed
+	//update MaxWalkingSpeed
 	if (Gait == EGait::WALKING)
 		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 165.0f;
 	if (Gait == EGait::RUNNING)
@@ -92,28 +85,45 @@ void UDefaultCharacterAnimInstance::UpdateMovementValues(float DeltaSeconds)
 
 void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
 {
-	// set ViewRotation
-	ViewDirection = OwningCharacter->GetViewRotation().Vector();
+	//Update YawViewDirection
+	float OldYawViewDirection = YawViewDirection;
+	YawViewDirection = OwningCharacter->GetControlRotation().Yaw;
+
+	//update ViewRotation
+	FVector OldViewDirection = ViewDirection;
+	ViewDirection = OwningCharacter->GetControlRotation().Vector();
 	ViewDirection.Normalize();
 
-	//Set Relative Direction
-	FVector OldRelativeVelocityDirection = RelativeVelocityDirection;
-	RelativeVelocityDirection = OwningCharacter->GetVelocity();
+	//update Relative Direction
+	FVector XYViewDirection = ViewDirection;
+	XYViewDirection.SetComponentForAxis(EAxis::Z, 0.0f);
+
+	if (bMoving)
+		RelativeVelocityDirection = OwningCharacter->GetVelocity();
+	else
+		RelativeVelocityDirection = FVector(1.0f, 0.0f, 0.0f);
+
 	RelativeVelocityDirection.Normalize();
-	RelativeVelocityDirection = FRotator(RelativeVelocityDirection.Rotation() - ViewDirection.Rotation()).Vector();
+	RelativeVelocityDirection = XYViewDirection.Rotation().UnrotateVector(RelativeVelocityDirection);
+	RelativeVelocityDirection.Normalize();
 
-	//set RotationRate
-	RotationRate = RelativeVelocityDirection.Rotation() - OldRelativeVelocityDirection.Rotation();
+	//update RotationRate
+	float GeneratedRotationRate = ((YawViewDirection - OldYawViewDirection) / (DeltaSeconds*1000))*1000;
+	GeneratedRotationRate = FMath::SmoothStep(-180.0f, 180.0f, RotationRate) * 2 - 1;
+	rotation.push_back(0);
+	rotation[0] = GeneratedRotationRate;
+	RotationRate = (rotation[0] + rotation[1] + rotation[2] + rotation[3] + rotation[4] + rotation[5]) / 6;
 
-	//set YawVelocityDirection
+
+	//update YawVelocityDirection
 	YawVelocityDirection = RelativeVelocityDirection.Rotation().Yaw;
 
-	//set MovementDirection
-	if (-135.0f >= YawVelocityDirection && YawVelocityDirection < -45.0f)
+	//update MovementDirection
+	if (-134.0f >= YawVelocityDirection && YawVelocityDirection <= -46.0f)
 		MovementDirection = EMovementDirection::LEFT;
-	else if (45.0f < YawVelocityDirection && YawVelocityDirection <= 135.0f)
+	else if (44.0f <= YawVelocityDirection && YawVelocityDirection <= 136.0f)
 		MovementDirection = EMovementDirection::RIGHT;
-	else if (YawVelocityDirection > 135.0f || -135.0f > YawVelocityDirection)
+	else if (YawVelocityDirection > 136.0f || -134.0f > YawVelocityDirection)
 		MovementDirection = EMovementDirection::BACKWARD;
 	else
 		MovementDirection = EMovementDirection::FORWARD;
@@ -122,4 +132,54 @@ void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
 	DirectionBlend.b = FMath::Abs(FMath::Clamp<float>(RelativeVelocityDirection.X, -1.0f, 0.0f));
 	DirectionBlend.l = FMath::Abs(FMath::Clamp<float>(RelativeVelocityDirection.Y, -1.0f, 0.0f));
 	DirectionBlend.r = FMath::Clamp<float>(RelativeVelocityDirection.Y, 0.0f, 1.0f);
+
+	//update rotation bools
+	if (!bMoving)
+	{
+		if (RotationRate == 0.0f)
+		{
+			bRotateR = false;
+			bRotateL = false;
+		}
+		else if (RotationRate < 0.0f)
+		{
+			bRotateL = true;
+			bRotateR = false;
+		}
+
+		else if (RotationRate > 0.0f)
+		{
+			bRotateR = true;
+			bRotateL = false;
+		}
+	}
+	else
+	{
+		bRotateR = false;
+		bRotateL = false;
+	}
+
+}
+
+void UDefaultCharacterAnimInstance::UpdateBlends()
+{
+	//update StrideBlend
+	StrideBlend = SpeedStrideBlendCurve->GetFloatValue(Speed);
+
+	//update Leanblends
+	LeanBlend.FB = (FMath::SmoothStep(-600, 600, RelativeVelocityDirection.X * Speed) * 2 - 1) / 2;
+	LeanBlend.RL = RotationRate / 2;
+	
+	if (Gait == EGait::WALKING)
+		LeanBlend.Alpha = 0.0f;
+	if (Gait == EGait::RUNNING)
+		LeanBlend.Alpha = 1.0f;
+	if (Gait == EGait::SPRINTING)
+		LeanBlend.Alpha = 1.0f;
+
+	//update WalkRunBlend
+	if (Gait == EGait::WALKING)
+		WalkRunBlend = 0.0f;
+	else
+		WalkRunBlend = 1.0f;
 }

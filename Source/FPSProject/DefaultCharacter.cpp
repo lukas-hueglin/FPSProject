@@ -17,12 +17,12 @@ ADefaultCharacter::ADefaultCharacter()
 	CharacterMesh->bCastDynamicShadow = true;
 	CharacterMesh->CastShadow = true;
 	CharacterMesh->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
-	CharacterMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -88.0f));
+	CharacterMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -89.0f));
 
 	// Create a CameraComponent	
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCamera->SetupAttachment(CharacterMesh, FName("FP_Camera"));
-	FirstPersonCamera->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f)); // Position the camera 10.0f, 0.0f, 83.0f
+	FirstPersonCamera->SetRelativeLocation(FVector(-200.0f, 0.0f, 0.0f)); // Position the camera 10.0f, 0.0f, 83.0f
 	FirstPersonCamera->bUsePawnControlRotation = true;
 
 	//Initialize bools
@@ -71,6 +71,11 @@ void ADefaultCharacter::MoveForward(float Value)
 	{
 		const FVector Direction = GetActorForwardVector();
 		AddMovementInput(Direction, Value);
+
+		if (Value > 0.0f)
+			bCanSprint = true;
+		else
+			bCanSprint = false;
 	}
 }
 
@@ -80,6 +85,7 @@ void ADefaultCharacter::MoveRight(float Value)
 	{
 		const FVector Direction = GetActorRightVector();
 		AddMovementInput(Direction, Value);
+		bCanSprint = false;
 	}
 }
 
@@ -100,8 +106,8 @@ void ADefaultCharacter::ToggleWalk()
 
 void ADefaultCharacter::StartSprint()
 {
-	bPressedSprint = true;
-	bPressedWalk = false;
+		bPressedSprint = true;
+		bPressedWalk = false;
 }
 
 void ADefaultCharacter::StopSprint()
