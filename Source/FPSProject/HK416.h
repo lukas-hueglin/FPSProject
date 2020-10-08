@@ -13,5 +13,6 @@ UCLASS()
 class FPSPROJECT_API AHK416 : public AFirearm
 {
 	GENERATED_BODY()
+
 	
 };
