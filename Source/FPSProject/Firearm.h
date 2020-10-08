@@ -8,16 +8,33 @@
 #include "Firearm.generated.h"
 
 USTRUCT(BlueprintType, Blueprintable)
+struct FAllAttachments : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		UStaticMesh* Mesh;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		UMaterial* Material;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		FName SocketName;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		int maxMatIndex;
+};
+
+USTRUCT(BlueprintType, Blueprintable)
 struct FAttachment : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-		USkeletalMeshComponent* mesh;
-	UPROPERTY()
-		UMaterial* material;
-	UPROPERTY()
-		int MatIndex;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		UStaticMesh* Mesh;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		UMaterial* Material;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		signed int matIndex;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		float dirtAmount;
 };
 
 UCLASS()
