@@ -33,8 +33,6 @@ struct FAttachment : public FTableRowBase
 		UMaterial* Material;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		signed int matIndex;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		float dirtAmount;
 };
 
 UCLASS()
@@ -47,7 +45,13 @@ public:
 	AFirearm();
 
 public:
-	USkeletalMeshComponent* root;
+	// root skeletalmesh
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		USkeletalMeshComponent* root;
+	
+	// Array of all Layouts
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TArray<UDataTable*> Layouts;
 
 protected:
 	// Called when the game starts or when spawned
@@ -56,6 +60,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	// Function to update an attachment
+	void UpdateAttachment(FAttachment Attachment);
 
 };
 

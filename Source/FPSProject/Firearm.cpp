@@ -25,3 +25,8 @@ void AFirearm::Tick(float DeltaTime)
 
 }
 
+// Function to update an attachment
+void AFirearm::UpdateAttachment(FAttachment Attachment) 
+{
+}
+
