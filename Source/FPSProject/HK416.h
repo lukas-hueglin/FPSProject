@@ -9,6 +9,7 @@
 /**
  * 
  */
+
 UCLASS()
 class FPSPROJECT_API AHK416 : public AFirearm
 {
@@ -17,41 +18,6 @@ class FPSPROJECT_API AHK416 : public AFirearm
 public:
 	// Sets default values for this actor's properties
 	AHK416();
-
-public:
-	//All attachment sockets
-	UPROPERTY()
-		FAttachment AssistPlunger;
-	UPROPERTY()
-		FAttachment Barrel;
-	UPROPERTY()
-		FAttachment Bolt;
-	UPROPERTY()
-		FAttachment BoltCatch;
-	UPROPERTY()
-		FAttachment BufferSystem;
-	UPROPERTY()
-		FAttachment ChargingHandle;
-	UPROPERTY()
-		FAttachment EjectionCover;
-	UPROPERTY()
-		FAttachment Gasblock;
-	UPROPERTY()
-		FAttachment LowerReceiver;
-	UPROPERTY()
-		FAttachment MagazineCatch;
-	UPROPERTY()
-		FAttachment ModeSwitch;
-	UPROPERTY()
-		FAttachment PistolGrip;
-	UPROPERTY()
-		FAttachment Rail;
-	UPROPERTY()
-		FAttachment Stock;
-	UPROPERTY()
-		FAttachment Trigger;
-	UPROPERTY()
-		FAttachment UpperReceiver;
 
 protected:
 	// Called when the game starts or when spawned
