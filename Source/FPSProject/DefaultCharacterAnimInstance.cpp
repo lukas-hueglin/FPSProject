@@ -12,6 +12,7 @@ UDefaultCharacterAnimInstance::UDefaultCharacterAnimInstance()
 	Speed = 0.0f;
 	YawVelocityDirection = 0.0f;
 	RotationRate = 0.0f;
+	SpeedMultiplier = 1.0f;
 
 	//initialize bools
 	bMoving = false;
@@ -21,6 +22,8 @@ UDefaultCharacterAnimInstance::UDefaultCharacterAnimInstance()
 	//initialize enums
 	Gait = EGait::RUNNING;
 	MovementDirection = EMovementDirection::FORWARD;
+	AssultRifleStates = EAssultRifleStates::RELAXED;
+	OverlayStates = EOverlayStates::DEFAULT;
 
 	//initialize structs
 	DirectionBlend = FDirectionBlend();
@@ -57,11 +60,30 @@ void UDefaultCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 void UDefaultCharacterAnimInstance::UpdateStates()
 {
 	if (OwningCharacter->bPressedSprint && OwningCharacter->bCanSprint)
+	{
 		Gait = EGait::SPRINTING;
+		AssultRifleStates = EAssultRifleStates::RELAXED;
+	}
 	else if (OwningCharacter->bPressedWalk)
+	{
 		Gait = EGait::WALKING;
+		AssultRifleStates = EAssultRifleStates::READY;
+	}
 	else
+	{
 		Gait = EGait::RUNNING;
+		AssultRifleStates = EAssultRifleStates::READY;
+	}
+
+	if (OwningCharacter->Equipment == EEquipment::NONE)
+		OverlayStates = EOverlayStates::DEFAULT;
+	else
+		OverlayStates = EOverlayStates::ASSULTRIFLE;
+
+	if (OwningCharacter->bAiming)
+		AssultRifleStates = EAssultRifleStates::AIMING;
+	else if (!OwningCharacter->bAiming && Gait != EGait::SPRINTING)
+		AssultRifleStates = EAssultRifleStates::READY;
 }
 
 void UDefaultCharacterAnimInstance::UpdateMovementValues(float DeltaSeconds)
@@ -76,11 +98,11 @@ void UDefaultCharacterAnimInstance::UpdateMovementValues(float DeltaSeconds)
 
 	//update MaxWalkingSpeed
 	if (Gait == EGait::WALKING)
-		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 165.0f;
+		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 165.0f*SpeedMultiplier;
 	if (Gait == EGait::RUNNING)
-		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 350.0f;
+		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 350.0f * SpeedMultiplier;
 	if (Gait == EGait::SPRINTING)
-		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 600.0f * SpeedMultiplier;
 }
 
 void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
@@ -88,7 +110,7 @@ void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
 	//Update YawViewDirection
 	float OldYawViewDirection = YawViewDirection;
 	YawViewDirection = OwningCharacter->GetControlRotation().Yaw;
-
+	
 	//update ViewRotation
 	FVector OldViewDirection = ViewDirection;
 	ViewDirection = OwningCharacter->GetControlRotation().Vector();
@@ -107,12 +129,13 @@ void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
 	RelativeVelocityDirection = XYViewDirection.Rotation().UnrotateVector(RelativeVelocityDirection);
 	RelativeVelocityDirection.Normalize();
 
-	//update RotationRate
+	/*update RotationRate
 	float GeneratedRotationRate = ((YawViewDirection - OldYawViewDirection) / (DeltaSeconds*1000))*1000;
 	GeneratedRotationRate = FMath::SmoothStep(-180.0f, 180.0f, RotationRate) * 2 - 1;
 	rotation.push_back(0);
 	rotation[0] = GeneratedRotationRate;
-	RotationRate = (rotation[0] + rotation[1] + rotation[2] + rotation[3] + rotation[4] + rotation[5]) / 6;
+	RotationRate = (rotation[0] + rotation[1] + rotation[2] + rotation[3] + rotation[4] + rotation[5]) / 6;*/
+	RotationRate = OwningCharacter->InputComponent->GetAxisValue(FName("Turn"));
 
 
 	//update YawVelocityDirection
@@ -127,7 +150,6 @@ void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
 		MovementDirection = EMovementDirection::BACKWARD;
 	else
 		MovementDirection = EMovementDirection::FORWARD;
-
 	DirectionBlend.f = FMath::Clamp<float>(RelativeVelocityDirection.X, 0.0f, 1.0f);
 	DirectionBlend.b = FMath::Abs(FMath::Clamp<float>(RelativeVelocityDirection.X, -1.0f, 0.0f));
 	DirectionBlend.l = FMath::Abs(FMath::Clamp<float>(RelativeVelocityDirection.Y, -1.0f, 0.0f));
@@ -168,7 +190,7 @@ void UDefaultCharacterAnimInstance::UpdateBlends()
 
 	//update Leanblends
 	LeanBlend.FB = (FMath::SmoothStep(-600, 600, RelativeVelocityDirection.X * Speed) * 2 - 1) / 2;
-	LeanBlend.RL = RotationRate / 2;
+	LeanBlend.RL = FMath::SmoothStep(0, 0.7, FMath::Abs(RotationRate))*FMath::Sign(RotationRate)/2;
 	
 	if (Gait == EGait::WALKING)
 		LeanBlend.Alpha = 0.0f;

@@ -28,6 +28,21 @@ enum class EMovementDirection : uint8
 	BACKWARD	UMETA(DisplayName = "Backward"),
 };
 
+UENUM(BlueprintType)
+enum class EAssultRifleStates : uint8
+{
+	RELAXED	UMETA(DisplayName = "Relaxed"),
+	READY		UMETA(DisplayName = "Ready"),
+	AIMING		UMETA(DisplayName = "Aiming"),
+};
+
+UENUM(BlueprintType)
+enum class EOverlayStates : uint8
+{
+	DEFAULT			UMETA(DisplayName = "Default"),
+	ASSULTRIFLE		UMETA(DisplayName = "AssultRifle"),
+};
+
 USTRUCT(BlueprintType)
 struct FDirectionBlend
 {
@@ -90,6 +105,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float YawViewDirection;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float SpeedMultiplier;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		bool bMoving;
 
@@ -106,8 +124,15 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		EGait Gait;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		EMovementDirection MovementDirection;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		EAssultRifleStates AssultRifleStates;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		EOverlayStates OverlayStates;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		FDirectionBlend DirectionBlend;

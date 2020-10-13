@@ -22,12 +22,17 @@ ADefaultCharacter::ADefaultCharacter()
 	// Create a CameraComponent	
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCamera->SetupAttachment(CharacterMesh, FName("FP_Camera"));
-	FirstPersonCamera->SetRelativeLocation(FVector(-200.0f, 0.0f, 0.0f)); // Position the camera 10.0f, 0.0f, 83.0f
+	FirstPersonCamera->SetRelativeLocation(FVector(10.0f, 0.0f, 83.0f)); // Position the camera 10.0f, 0.0f, 83.0f
 	FirstPersonCamera->bUsePawnControlRotation = true;
 
 	//Initialize bools
 	bPressedSprint = false;
 	bPressedWalk = false;
+	bAiming = false;
+	bCanSprint = true;
+
+	//Initialize Enums
+	Equipment = EEquipment::NONE;
 
 }
 
@@ -42,13 +47,15 @@ void ADefaultCharacter::BeginPlay()
 void ADefaultCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
 void ADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAction("SecondaryAction", IE_Pressed, this, &ADefaultCharacter::StartSecondaryAction);
+	PlayerInputComponent->BindAction("SecondaryAction", IE_Released, this, &ADefaultCharacter::StopSecondaryAction);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ADefaultCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ADefaultCharacter::MoveRight);
@@ -60,9 +67,20 @@ void ADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction("Walk", IE_Pressed, this, &ADefaultCharacter::ToggleWalk);
 
+	PlayerInputComponent->BindAction("CycleEquipment", IE_Pressed, this, &ADefaultCharacter::CycleEquipment);
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ADefaultCharacter::StartSprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ADefaultCharacter::StopSprint);
+}
+
+void ADefaultCharacter::StartSecondaryAction()
+{
+	bAiming = true;
+}
+
+void ADefaultCharacter::StopSecondaryAction()
+{
+	bAiming = false;
 }
 
 void ADefaultCharacter::MoveForward(float Value)
@@ -102,6 +120,15 @@ void ADefaultCharacter::StopJump()
 void ADefaultCharacter::ToggleWalk()
 {
 	bPressedWalk = !bPressedWalk;
+}
+
+void ADefaultCharacter::CycleEquipment()
+{
+	//Equipment = EEquipment((uint8)Equipment + 1U);
+	if (Equipment == EEquipment::NONE)
+		Equipment = EEquipment::PRIMARY;
+	else
+		Equipment = EEquipment::NONE;
 }
 
 void ADefaultCharacter::StartSprint()
