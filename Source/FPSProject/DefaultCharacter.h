@@ -2,9 +2,19 @@
 
 #pragma once
 
+#include "DrawDebugHelpers.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "DefaultCharacter.generated.h"
+
+class UDefaultCharacterAnimInstance;
+
+UENUM(BlueprintType)
+enum class EEquipment : uint8
+{
+	NONE		UMETA(DisplayName = "None"),
+	PRIMARY		UMETA(DisplayName = "Primary"),
+};
 
 UCLASS()
 class FPSPROJECT_API ADefaultCharacter : public ACharacter
@@ -12,16 +22,30 @@ class FPSPROJECT_API ADefaultCharacter : public ACharacter
 	GENERATED_BODY()
 
 		//Pawn mesh
-		UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-		class USkeletalMeshComponent* CharacterMesh;
+		UPROPERTY(EditAnywhere, Category = Mesh)
+			class USkeletalMeshComponent* CharacterMesh;
 
 		//First person camera
-		UPROPERTY(VisibleAnywhere, Category = Camera)
-		class UCameraComponent* FirstPersonCamera;
+		UPROPERTY(EditAnywhere, Category = Camera)
+			class UCameraComponent* FirstPersonCamera;
 
 public:
 	// Sets default values for this character's properties
 	ADefaultCharacter();
+public:
+	UDefaultCharacterAnimInstance* AnimInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		bool bAiming;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		bool bPressedWalk;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		bool bPressedSprint;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		bool bCanSprint;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		EEquipment Equipment;
 
 protected:
 	// Called when the game starts or when spawned
@@ -33,6 +57,12 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	// SecondaryAction
+	UFUNCTION()
+		void StartSecondaryAction();
+	UFUNCTION()
+		void StopSecondaryAction();
 
 	//Called to bind movement input
 	UFUNCTION()
@@ -46,4 +76,17 @@ public:
 	UFUNCTION()
 		void StopJump();
 
+	//Called to bind walk state
+	UFUNCTION()
+		void ToggleWalk();
+	
+	// Called to cycle trough all weapons
+	UFUNCTION()
+		void CycleEquipment();
+
+	//Called to bind sprint state
+	UFUNCTION()
+		void StartSprint();
+	UFUNCTION()
+		void StopSprint();
 };
