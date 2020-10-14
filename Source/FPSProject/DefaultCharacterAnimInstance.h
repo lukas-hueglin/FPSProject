@@ -106,7 +106,7 @@ public:
 		float YawViewDirection;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float SpeedMultiplier;
+		float AimSweepTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		bool bMoving;

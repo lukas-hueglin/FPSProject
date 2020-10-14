@@ -12,7 +12,6 @@ UDefaultCharacterAnimInstance::UDefaultCharacterAnimInstance()
 	Speed = 0.0f;
 	YawVelocityDirection = 0.0f;
 	RotationRate = 0.0f;
-	SpeedMultiplier = 1.0f;
 
 	//initialize bools
 	bMoving = false;
@@ -102,11 +101,11 @@ void UDefaultCharacterAnimInstance::UpdateMovementValues(float DeltaSeconds)
 
 	//update MaxWalkingSpeed
 	if (Gait == EGait::WALKING)
-		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 165.0f*SpeedMultiplier;
+		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 165.0f;
 	if (Gait == EGait::RUNNING)
-		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 350.0f * SpeedMultiplier;
+		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 350.0f;
 	if (Gait == EGait::SPRINTING)
-		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 600.0f * SpeedMultiplier;
+		OwningCharacter->GetCharacterMovement()->MaxWalkSpeed = 600.0f;
 }
 
 void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
@@ -158,6 +157,11 @@ void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
 	DirectionBlend.b = FMath::Abs(FMath::Clamp<float>(RelativeVelocityDirection.X, -1.0f, 0.0f));
 	DirectionBlend.l = FMath::Abs(FMath::Clamp<float>(RelativeVelocityDirection.Y, -1.0f, 0.0f));
 	DirectionBlend.r = FMath::Clamp<float>(RelativeVelocityDirection.Y, 0.0f, 1.0f);
+
+	// update AimSweepTime
+	AimSweepTime = FMath::SmoothStep(-90, 90, -ViewDirection.Rotation().GetComponentForAxis(EAxis::Y));
+	//AimSweepTime = -ViewDirection.Rotation().GetComponentForAxis(EAxis::Y) + 90;
+
 	
 	//update rotation bools
 	if (!bMoving)
