@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include "DrawDebugHelpers.h"
+#include "Firearm.h"
+#include "HK416.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "DefaultCharacter.generated.h"
@@ -10,10 +11,19 @@
 class UDefaultCharacterAnimInstance;
 
 UENUM(BlueprintType)
-enum class EEquipment : uint8
+enum class EActiveEquipmentSlot : uint8
 {
 	NONE		UMETA(DisplayName = "None"),
 	PRIMARY		UMETA(DisplayName = "Primary"),
+};
+
+USTRUCT(BlueprintType)
+struct FEquipment
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		AHK416* Primary;
 };
 
 UCLASS()
@@ -45,7 +55,13 @@ public:
 		bool bCanSprint;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		EEquipment Equipment;
+		EActiveEquipmentSlot ActiveEquipmentSlot;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		FEquipment Equipment;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Spawning)
+		TSubclassOf<class AHK416> HK416Class;
 
 protected:
 	// Called when the game starts or when spawned

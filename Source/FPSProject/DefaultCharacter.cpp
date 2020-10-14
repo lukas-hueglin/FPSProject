@@ -32,8 +32,7 @@ ADefaultCharacter::ADefaultCharacter()
 	bCanSprint = true;
 
 	//Initialize Enums
-	Equipment = EEquipment::NONE;
-
+	ActiveEquipmentSlot = EActiveEquipmentSlot::NONE;
 }
 
 // Called when the game starts or when spawned
@@ -41,6 +40,27 @@ void ADefaultCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Try to spawn the primary weapon
+	if (HK416Class != NULL)
+	{
+		UWorld* const World = GetWorld();
+
+		if (World != NULL)
+		{
+			// set loaction, rotation and spawn parameters
+			FVector Loc = FVector(0.0f, 0.0f, 0.0f);
+			FRotator Rot = FRotator(0.0f, 0.0f, 0.0f);
+
+			FActorSpawnParameters ActorSpawnParams;
+			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			// spawning the primary weapon
+			Equipment.Primary = World->SpawnActor<AHK416>(HK416Class, Loc, Rot, ActorSpawnParams);
+			
+			Equipment.Primary->AttachToComponent(CharacterMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), FName("Rifle_Hand_R"));
+			MoveIgnoreActorAdd(Equipment.Primary);
+		}
+	}
 }
 
 // Called every frame
@@ -125,10 +145,10 @@ void ADefaultCharacter::ToggleWalk()
 void ADefaultCharacter::CycleEquipment()
 {
 	//Equipment = EEquipment((uint8)Equipment + 1U);
-	if (Equipment == EEquipment::NONE)
-		Equipment = EEquipment::PRIMARY;
+	if (ActiveEquipmentSlot == EActiveEquipmentSlot::NONE)
+		ActiveEquipmentSlot = EActiveEquipmentSlot::PRIMARY;
 	else
-		Equipment = EEquipment::NONE;
+		ActiveEquipmentSlot = EActiveEquipmentSlot::NONE;
 }
 
 void ADefaultCharacter::StartSprint()

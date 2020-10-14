@@ -75,7 +75,7 @@ void UDefaultCharacterAnimInstance::UpdateStates()
 		AssultRifleStates = EAssultRifleStates::READY;
 	}
 
-	if (OwningCharacter->Equipment == EEquipment::NONE)
+	if (OwningCharacter->ActiveEquipmentSlot == EActiveEquipmentSlot::NONE)
 		OverlayStates = EOverlayStates::DEFAULT;
 	else
 		OverlayStates = EOverlayStates::ASSULTRIFLE;
@@ -135,7 +135,7 @@ void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
 	rotation.push_back(0);
 	rotation[0] = GeneratedRotationRate;
 	RotationRate = (rotation[0] + rotation[1] + rotation[2] + rotation[3] + rotation[4] + rotation[5]) / 6;*/
-	RotationRate = OwningCharacter->InputComponent->GetAxisValue(FName("Turn"));
+	//RotationRate = OwningCharacter->InputComponent->GetAxisValue(FName("Turn"));
 
 
 	//update YawVelocityDirection
@@ -154,7 +154,7 @@ void UDefaultCharacterAnimInstance::UpdateRotationValues(float DeltaSeconds)
 	DirectionBlend.b = FMath::Abs(FMath::Clamp<float>(RelativeVelocityDirection.X, -1.0f, 0.0f));
 	DirectionBlend.l = FMath::Abs(FMath::Clamp<float>(RelativeVelocityDirection.Y, -1.0f, 0.0f));
 	DirectionBlend.r = FMath::Clamp<float>(RelativeVelocityDirection.Y, 0.0f, 1.0f);
-
+	
 	//update rotation bools
 	if (!bMoving)
 	{
