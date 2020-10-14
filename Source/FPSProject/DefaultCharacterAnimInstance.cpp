@@ -59,6 +59,7 @@ void UDefaultCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 void UDefaultCharacterAnimInstance::UpdateStates()
 {
+	// Update Gait and RifleState Values
 	if (OwningCharacter->bPressedSprint && OwningCharacter->bCanSprint)
 	{
 		Gait = EGait::SPRINTING;
@@ -75,11 +76,14 @@ void UDefaultCharacterAnimInstance::UpdateStates()
 		AssultRifleStates = EAssultRifleStates::READY;
 	}
 
+	// Update OverlayState Values
 	if (OwningCharacter->ActiveEquipmentSlot == EActiveEquipmentSlot::NONE)
 		OverlayStates = EOverlayStates::DEFAULT;
-	else
+	else if (OwningCharacter->ActiveEquipmentSlot == EActiveEquipmentSlot::PRIMARY)
 		OverlayStates = EOverlayStates::ASSULTRIFLE;
 
+
+	// Update RifleState Values
 	if (OwningCharacter->bAiming)
 		AssultRifleStates = EAssultRifleStates::AIMING;
 	else if (!OwningCharacter->bAiming && Gait != EGait::SPRINTING)

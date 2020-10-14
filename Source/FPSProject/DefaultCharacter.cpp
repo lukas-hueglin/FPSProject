@@ -57,7 +57,7 @@ void ADefaultCharacter::BeginPlay()
 			// spawning the primary weapon
 			Equipment.Primary = World->SpawnActor<AHK416>(HK416Class, Loc, Rot, ActorSpawnParams);
 			
-			Equipment.Primary->AttachToComponent(CharacterMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), FName("Rifle_Hand_R"));
+			UpdateEquipmentAttachments();
 			MoveIgnoreActorAdd(Equipment.Primary);
 		}
 	}
@@ -87,7 +87,8 @@ void ADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction("Walk", IE_Pressed, this, &ADefaultCharacter::ToggleWalk);
 
-	PlayerInputComponent->BindAction("CycleEquipment", IE_Pressed, this, &ADefaultCharacter::CycleEquipment);
+	PlayerInputComponent->BindAction("NextEquipmentSlot", IE_Pressed, this, &ADefaultCharacter::NextEquipmentSlot);
+	PlayerInputComponent->BindAction("PreviousEquipmentSlot", IE_Pressed, this, &ADefaultCharacter::PreviousEquipmentSlot);
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ADefaultCharacter::StartSprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ADefaultCharacter::StopSprint);
@@ -142,13 +143,37 @@ void ADefaultCharacter::ToggleWalk()
 	bPressedWalk = !bPressedWalk;
 }
 
-void ADefaultCharacter::CycleEquipment()
+void ADefaultCharacter::NextEquipmentSlot()
 {
-	//Equipment = EEquipment((uint8)Equipment + 1U);
+	uint8 Slot = (uint8)ActiveEquipmentSlot + 1;
+	if (Slot > 1)
+		Slot -= 2;
+	ActiveEquipmentSlot = EActiveEquipmentSlot(Slot);
+	UpdateEquipmentAttachments();
+}
+
+void ADefaultCharacter::PreviousEquipmentSlot()
+{
+	uint8 Slot = (uint8)ActiveEquipmentSlot - 1;
+	if (Slot > 200)
+		Slot += 2;
+	ActiveEquipmentSlot = EActiveEquipmentSlot(Slot);
+	UpdateEquipmentAttachments();
+}
+
+void ADefaultCharacter::UpdateEquipmentAttachments()
+{
 	if (ActiveEquipmentSlot == EActiveEquipmentSlot::NONE)
-		ActiveEquipmentSlot = EActiveEquipmentSlot::PRIMARY;
-	else
-		ActiveEquipmentSlot = EActiveEquipmentSlot::NONE;
+	{
+		// Attach primary weapon to the body
+		Equipment.Primary->AttachToComponent(CharacterMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), FName("Rifle_Body"));
+	}
+	else if (ActiveEquipmentSlot == EActiveEquipmentSlot::PRIMARY)
+	{
+		// Attach primary weapon to the hand
+		Equipment.Primary->AttachToComponent(CharacterMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), FName("Rifle_Hand_R"));
+	}
+
 }
 
 void ADefaultCharacter::StartSprint()

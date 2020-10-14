@@ -98,7 +98,11 @@ public:
 	
 	// Called to cycle trough all weapons
 	UFUNCTION()
-		void CycleEquipment();
+		void NextEquipmentSlot();
+	UFUNCTION()
+		void PreviousEquipmentSlot();
+	UFUNCTION()
+		void UpdateEquipmentAttachments();
 
 	//Called to bind sprint state
 	UFUNCTION()
