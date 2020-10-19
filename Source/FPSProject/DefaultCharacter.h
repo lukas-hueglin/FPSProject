@@ -4,6 +4,7 @@
 
 #include "Firearm.h"
 #include "HK416.h"
+#include "Projectile.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "DefaultCharacter.generated.h"
@@ -62,6 +63,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Spawning)
 		TSubclassOf<class AHK416> HK416Class;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Spawning)
+		TSubclassOf<class AProjectile> ProjectileClass;
 
 protected:
 	// Called when the game starts or when spawned
@@ -79,6 +82,9 @@ public:
 		void StartSecondaryAction();
 	UFUNCTION()
 		void StopSecondaryAction();
+	// PrimaryAction
+	UFUNCTION()
+		void StartPrimaryAction();
 
 	//Called to bind movement input
 	UFUNCTION()
@@ -109,4 +115,9 @@ public:
 		void StartSprint();
 	UFUNCTION()
 		void StopSprint();
+
+
+	// Called on fire
+	UFUNCTION()
+		void OnFire(AFirearm* Firearm);
 };

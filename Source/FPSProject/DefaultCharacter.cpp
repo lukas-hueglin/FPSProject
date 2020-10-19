@@ -2,6 +2,7 @@
 
 
 #include "DefaultCharacter.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 
@@ -76,6 +77,7 @@ void ADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction("SecondaryAction", IE_Pressed, this, &ADefaultCharacter::StartSecondaryAction);
 	PlayerInputComponent->BindAction("SecondaryAction", IE_Released, this, &ADefaultCharacter::StopSecondaryAction);
+	PlayerInputComponent->BindAction("PrimaryAction", IE_Pressed, this, &ADefaultCharacter::StartPrimaryAction);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ADefaultCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ADefaultCharacter::MoveRight);
@@ -102,6 +104,14 @@ void ADefaultCharacter::StartSecondaryAction()
 void ADefaultCharacter::StopSecondaryAction()
 {
 	bAiming = false;
+}
+
+void ADefaultCharacter::StartPrimaryAction()
+{
+	if (ActiveEquipmentSlot == EActiveEquipmentSlot::PRIMARY)
+	{
+		OnFire(Equipment.Primary);
+	}
 }
 
 void ADefaultCharacter::MoveForward(float Value)
@@ -185,5 +195,29 @@ void ADefaultCharacter::StartSprint()
 void ADefaultCharacter::StopSprint()
 {
 	bPressedSprint = false;
+}
+
+void ADefaultCharacter::OnFire(AFirearm* Firearm)
+{
+	// try and fire a projectile
+	if (ProjectileClass != NULL)
+	{
+		UWorld* const World = GetWorld();
+		if (World != NULL)
+		{
+			const FRotator SpawnRotation = GetControlRotation();
+			const FVector SpawnLocation = Firearm->RootMesh->GetSocketByName(FName("Muzzle"))->GetSocketLocation(Firearm->RootMesh);
+
+			//Set Spawn Collision Handling Override
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			// spawn the projectile at the muzzle
+			World->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Fire!"));
+		}
+	}
 }
 
